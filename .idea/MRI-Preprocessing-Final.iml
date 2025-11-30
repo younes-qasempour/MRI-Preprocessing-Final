@@ -4,6 +4,27 @@
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/30-nov-Final-MRI-Data" />
       <excludeFolder url="file://$MODULE_DIR$/30-nov-Final-MRI-Data-1mm" />
+      <excludeFolder url="file://$MODULE_DIR$/Old-files-and-code" />
+      <excludeFolder url="file://$MODULE_DIR$/Old-files-and-code/10-june-brain-mask-modified" />
+      <excludeFolder url="file://$MODULE_DIR$/Old-files-and-code/10-june-bran-mask" />
+      <excludeFolder url="file://$MODULE_DIR$/Old-files-and-code/23-july-brains-extracted" />
+      <excludeFolder url="file://$MODULE_DIR$/Old-files-and-code/23-july-images-and-modified-masks" />
+      <excludeFolder url="file://$MODULE_DIR$/Old-files-and-code/24-july-intensity-normalized" />
+      <excludeFolder url="file://$MODULE_DIR$/Old-files-and-code/25-nov-New-MRI-GBM-Thesis" />
+      <excludeFolder url="file://$MODULE_DIR$/Old-files-and-code/25-nov-brain-masks-new" />
+      <excludeFolder url="file://$MODULE_DIR$/Old-files-and-code/25-nov-new-images-output-denoised-bfc" />
+      <excludeFolder url="file://$MODULE_DIR$/Old-files-and-code/25-nov-registered-new" />
+      <excludeFolder url="file://$MODULE_DIR$/Old-files-and-code/26-nov-brain-masks-new" />
+      <excludeFolder url="file://$MODULE_DIR$/Old-files-and-code/26-nov-brain-masks-new-modified" />
+      <excludeFolder url="file://$MODULE_DIR$/Old-files-and-code/27-nov-brains-extracted-new" />
+      <excludeFolder url="file://$MODULE_DIR$/Old-files-and-code/27-nov-intensity-normalized-new" />
+      <excludeFolder url="file://$MODULE_DIR$/Old-files-and-code/30-may-output" />
+      <excludeFolder url="file://$MODULE_DIR$/Old-files-and-code/30-nov-Final-MRI-Data" />
+      <excludeFolder url="file://$MODULE_DIR$/Old-files-and-code/30-nov-Final-MRI-Data-1mm" />
+      <excludeFolder url="file://$MODULE_DIR$/Old-files-and-code/9-june-output" />
+      <excludeFolder url="file://$MODULE_DIR$/Old-files-and-code/9-june-registered-output" />
+      <excludeFolder url="file://$MODULE_DIR$/Old-files-and-code/Final-Code-For_preprocessing" />
+      <excludeFolder url="file://$MODULE_DIR$/Old-files-and-code/final-24-july-resampled-to-IVR" />
     </content>
     <orderEntry type="jdk" jdkName="mri-preprocessing" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
