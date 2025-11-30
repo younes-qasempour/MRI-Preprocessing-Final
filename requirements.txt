@@ -1,0 +1,16 @@
+numpy
+scipy
+scikit-image
+pandas
+matplotlib
+pillow
+tqdm
+SimpleITK
+nibabel
+pynrrd
+opencv-python
+ipywidgets
+ipykernel
+antspyx>=0.4.2
+antspynet>=0.3.0
+tensorflow>=2.12,<2.16
