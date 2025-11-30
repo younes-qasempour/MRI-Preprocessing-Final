@@ -1,0 +1,40 @@
+name: mri-preprocessing
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  # Core
+  - python=3.10
+  - pip
+
+  # Scientific stack
+  - numpy
+  - scipy
+  - scikit-image
+  - pandas
+  - matplotlib
+  - pillow
+  - tqdm
+
+  # Medical imaging and IO
+  - simpleitk
+  - nibabel
+  - pynrrd   # provides the `nrrd` module
+  - opencv   # provides the `cv2` module
+
+  # Notebooks
+  - jupyterlab
+  - ipykernel
+  - ipywidgets
+
+  # For compatibility/security
+  - openssl
+
+  - pip:
+      # ANTs ecosystem (Python bindings)
+      - antspyx>=0.4.2   # import as `ants`
+      - antspynet>=0.3.0
+
+      # Deep learning backend required by antspynet (CPU-only)
+      # TensorFlow 2.12–2.15 support Python 3.10; 2.15 is recommended on CPU
+      - tensorflow>=2.12,<2.16
