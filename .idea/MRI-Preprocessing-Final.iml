@@ -25,6 +25,7 @@
       <excludeFolder url="file://$MODULE_DIR$/Old-files-and-code/9-june-registered-output" />
       <excludeFolder url="file://$MODULE_DIR$/Old-files-and-code/Final-Code-For_preprocessing" />
       <excludeFolder url="file://$MODULE_DIR$/Old-files-and-code/final-24-july-resampled-to-IVR" />
+      <excludeFolder url="file://$MODULE_DIR$/Images-For-Modeling" />
     </content>
     <orderEntry type="jdk" jdkName="mri-preprocessing" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
