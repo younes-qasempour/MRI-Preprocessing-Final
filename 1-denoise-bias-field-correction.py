@@ -3,12 +3,19 @@
 
 """
 Script to automatically perform denoising and bias field correction on MRI images.
-This script processes all images in the 25-nov-New-MRI-GBM-Thesis folder and saves the results
-in the 25-nov-new-images-output-denoised-bfc folder with the same structure.
+
+Usage:
+    python 1-denoise-bias-field-correction.py \
+        --input_dir MRI-Repeat \
+        --output_dir repeat-1
+
+If no arguments are provided, the script will default to the historical paths
+used in prior runs (25-nov-New-MRI-GBM-Thesis → 25-nov-new-images-output-denoised-bfc).
 """
 
 import os
 import sys
+import argparse
 import SimpleITK as sitk
 from helpers import add_suffix_to_filename
 import warnings
@@ -96,15 +103,22 @@ def process_image(input_path, output_path):
 
 def main():
     """
-    Main function to process all MRI images in the MRI-Images folder.
+    Main function to process all MRI images in a dataset directory structure.
+    Expects input_dir to contain per-patient folders with NIfTI files inside.
     """
     # Get the base directory
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    
-    # Define input and output directories (updated for 25 Nov dataset)
-    input_dir = os.path.join(BASE_DIR, '25-nov-New-MRI-GBM-Thesis')
-    output_dir = os.path.join(BASE_DIR, '25-nov-new-images-output-denoised-bfc')
-    
+
+    parser = argparse.ArgumentParser(description='Denoise and perform bias field correction on MRI volumes.')
+    parser.add_argument('--input_dir', type=str, default=os.path.join(BASE_DIR, '25-nov-New-MRI-GBM-Thesis'),
+                        help='Path to the root input directory containing patient subfolders (default: 25-nov-New-MRI-GBM-Thesis)')
+    parser.add_argument('--output_dir', type=str, default=os.path.join(BASE_DIR, '25-nov-new-images-output-denoised-bfc'),
+                        help='Path to the root output directory where processed images will be saved (default: 25-nov-new-images-output-denoised-bfc)')
+
+    args = parser.parse_args()
+    input_dir = args.input_dir
+    output_dir = args.output_dir
+
     # Validate input directory exists
     if not os.path.isdir(input_dir):
         print(f"Input directory not found: {input_dir}")
@@ -112,32 +126,32 @@ def main():
 
     # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
-    
+
     # Process all images in the input folder
     for patient_folder in os.listdir(input_dir):
         patient_path = os.path.join(input_dir, patient_folder)
-        
+
         # Skip if not a directory
         if not os.path.isdir(patient_path):
             continue
-        
+
         # Create patient output directory
         patient_output_path = os.path.join(output_dir, patient_folder)
         os.makedirs(patient_output_path, exist_ok=True)
-        
+
         # Process all images in the patient folder
         for image_file in os.listdir(patient_path):
             # Skip if not a NIfTI file
             if not (image_file.endswith('.nii') or image_file.endswith('.nii.gz')):
                 continue
-            
+
             # Define input and output paths
             input_path = os.path.join(patient_path, image_file)
-            
+
             # Add suffix to the filename
             output_filename = add_suffix_to_filename(image_file, suffix='-d-bf')
             output_path = os.path.join(patient_output_path, output_filename)
-            
+
             # Process the image
             process_image(input_path, output_path)
 
