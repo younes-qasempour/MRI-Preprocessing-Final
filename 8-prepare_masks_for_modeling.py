@@ -33,8 +33,9 @@ from typing import Optional, Tuple
 
 
 REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
-INPUT_ROOT = os.path.join(REPO_ROOT, '30-nov-Final-MRI-Data-1mm', 'Masks')
-OUTPUT_ROOT = os.path.join(REPO_ROOT, 'Masks-For-Modeling')
+# Defaults updated to consume repeat-6 outputs and write to final-repeat
+DEFAULT_INPUT_ROOT = os.path.join(REPO_ROOT, 'repeat-6', 'Masks')
+DEFAULT_OUTPUT_ROOT = os.path.join(REPO_ROOT, 'final-repeat', 'Masks-For-Modeling')
 
 
 GBM_RE = re.compile(r"gbm\s*(\d{1,3})", re.IGNORECASE)
@@ -123,7 +124,7 @@ def target_name(patient_id: str, src_name: str) -> str:
     return f"{patient_id}_MASK{ext}"
 
 
-def run(input_root: str = INPUT_ROOT, output_root: str = OUTPUT_ROOT) -> None:
+def run(input_root: str = DEFAULT_INPUT_ROOT, output_root: str = DEFAULT_OUTPUT_ROOT) -> None:
     if not os.path.isdir(input_root):
         raise FileNotFoundError(f"Input directory not found: {input_root}")
 
@@ -162,4 +163,12 @@ def run(input_root: str = INPUT_ROOT, output_root: str = OUTPUT_ROOT) -> None:
 
 
 if __name__ == '__main__':
-    run()
+    # Allow overriding via CLI while keeping repository-friendly defaults
+    import argparse
+    parser = argparse.ArgumentParser(description='Prepare masks for modeling (flat folder, standardized names).')
+    parser.add_argument('--input-root', type=str, default=DEFAULT_INPUT_ROOT,
+                        help='Input root directory containing resampled masks (default: repeat-6/Masks).')
+    parser.add_argument('--output-root', type=str, default=DEFAULT_OUTPUT_ROOT,
+                        help='Output root directory for standardized masks (default: final-repeat/Masks-For-Modeling).')
+    args = parser.parse_args()
+    run(input_root=args.input_root, output_root=args.output_root)
