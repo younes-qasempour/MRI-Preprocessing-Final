@@ -297,17 +297,32 @@ def process_patient_masks(
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Resample MRI images and segmentations to 1x1x1 mm isotropic spacing.")
+    # Backward-compatible root with Images/ and Masks/ layout (optional)
     parser.add_argument(
         "--root-dir",
         type=str,
-        default="/home/younes/PycharmProjects/MRI-Preprocessing/30-nov-Final-MRI-Data",
-        help="Root directory containing Images/ and Masks/",
+        default=None,
+        help="Root directory containing Images/ and Masks/ subfolders (optional, ignored if --images-root is provided).",
+    )
+    # New explicit roots matching this project layout
+    base_dir = Path(__file__).resolve().parent
+    parser.add_argument(
+        "--images-root",
+        type=str,
+        default=str(base_dir / "repeat-5"),
+        help="Directory containing per-patient image folders (e.g., repeat-5).",
+    )
+    parser.add_argument(
+        "--masks-root",
+        type=str,
+        default=str(base_dir / "modified-seg-repeat"),
+        help="Directory containing segmentation masks (e.g., modified-seg-repeat).",
     )
     parser.add_argument(
         "--output-root",
         type=str,
-        default="/home/younes/PycharmProjects/MRI-Preprocessing/30-nov-Final-MRI-Data-1mm",
-        help="Output root directory where resampled data will be written (mirrors structure).",
+        default=str(base_dir / "repeat-6"),
+        help="Output root directory where resampled data will be written.",
     )
     parser.add_argument(
         "--target-spacing",
@@ -327,11 +342,20 @@ def parse_args() -> argparse.Namespace:
 def main():
     args = parse_args()
 
-    root_dir = Path(args.root_dir)
-    images_root = root_dir / "Images"
-    masks_root = root_dir / "Masks"
+    # Determine input roots
+    images_root: Path
+    masks_root: Path
+    if args.root_dir and not args.images_root:
+        # Legacy mode: expect Images/ and Masks/ under root-dir
+        root_dir = Path(args.root_dir)
+        images_root = root_dir / "Images"
+        masks_root = root_dir / "Masks"
+    else:
+        images_root = Path(args.images_root)
+        masks_root = Path(args.masks_root)
 
     output_root = Path(args.output_root)
+    # Keep images and masks separated inside output root to avoid name clashes
     output_images_root = output_root / "Images"
     output_masks_root = output_root / "Masks"
 
