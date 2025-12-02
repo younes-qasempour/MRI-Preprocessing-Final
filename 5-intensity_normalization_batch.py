@@ -194,10 +194,13 @@ def main():
     """
     Main function to process all patients and their images.
     """
-    # Define base directories (updated to 27/26 Nov folders)
-    input_base_dir = "27-nov-brains-extracted-new"
-    mask_base_dir = "26-nov-brain-masks-new-modified"
-    output_base_dir = "27-nov-intensity-normalized-new"
+    # Define base directories (updated for repeat workflow)
+    # Inputs: repeat-3 (brain-extracted images)
+    # Masks:  repeat-2 (NRRD masks)
+    # Output: repeat-5 (intensity-normalized images)
+    input_base_dir = "repeat-3"
+    mask_base_dir = "repeat-2"
+    output_base_dir = "repeat-5"
     
     # Create output base directory if it doesn't exist
     if not os.path.exists(output_base_dir):
