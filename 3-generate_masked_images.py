@@ -2,11 +2,11 @@
 """
 Script to generate masked MRI images using existing brain masks.
 
-This script:
-1. Reads MRI images from 25-nov-registered-new
-2. Reads brain masks from 26-nov-brain-masks-new-modified
+This script (current workflow as per issue request):
+1. Reads MRI images from repeat-4
+2. Reads brain masks (NRRD format) from repeat-2
 3. Applies masks to images
-4. Saves masked images to 27-nov-brains-extracted-new with the same structure
+4. Saves masked images to repeat-3 with the same structure
 
 The script includes error handling for various edge cases and will skip
 already processed images if run multiple times.
@@ -20,11 +20,11 @@ import numpy as np
 import sys
 from helpers import add_suffix_to_filename
 
-# Define paths (update for 25/26/27-nov workflow)
+# Define paths (updated for repeat workflow)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-IMAGES_DIR = os.path.join(BASE_DIR, "25-nov-registered-new")
-MASKS_DIR = os.path.join(BASE_DIR, "26-nov-brain-masks-new-modified")
-OUTPUT_DIR = os.path.join(BASE_DIR, "27-nov-brains-extracted-new")
+IMAGES_DIR = os.path.join(BASE_DIR, "repeat-4")
+MASKS_DIR = os.path.join(BASE_DIR, "repeat-2")
+OUTPUT_DIR = os.path.join(BASE_DIR, "repeat-3")
 
 def ensure_directory_exists(directory):
     """Create directory if it doesn't exist."""
@@ -53,8 +53,9 @@ def process_patient(patient_dir):
             print(f"No image files found for {patient_dir}")
             return
         
-        # Get the mask file for this patient - using more specific pattern
-        mask_files = glob.glob(os.path.join(MASKS_DIR, patient_dir, "*_brainMask*.nrrd"))
+        # Get the mask file for this patient (NRRD format)
+        # Be flexible on naming; pick the first .nrrd mask found in the patient's folder
+        mask_files = glob.glob(os.path.join(MASKS_DIR, patient_dir, "*.nrrd"))
         
         if not mask_files:
             print(f"No mask file found for {patient_dir}")
@@ -63,10 +64,28 @@ def process_patient(patient_dir):
         # We expect only one mask file per patient
         mask_file = mask_files[0]
         
-        # Read the mask using ANTs
+        # Read the mask (NRRD). Prefer ANTs reader; if it fails, use SimpleITK and convert.
         print(f"Reading mask: {mask_file}")
         try:
-            mask_ants = ants.image_read(mask_file, reorient='IAL')
+            try:
+                mask_ants = ants.image_read(mask_file, reorient='IAL')
+            except Exception:
+                # Fallback to SimpleITK then convert to ANTs image
+                mask_sitk = sitk.ReadImage(mask_file)
+                mask_np = sitk.GetArrayFromImage(mask_sitk)  # z, y, x (ITK)
+                # Convert ITK (z,y,x) to ANTs (x,y,z) expected orientation via transpose
+                mask_np_ants = np.transpose(mask_np, (2, 1, 0))
+                spacing = tuple(reversed(mask_sitk.GetSpacing()))
+                direction = mask_sitk.GetDirection()
+                # ITK direction is a flat tuple length 9; reshape then reverse axes to match transpose
+                if len(direction) == 9:
+                    direction_matrix = np.array(direction).reshape(3, 3)
+                    direction_matrix = direction_matrix[:, ::-1][::-1, :]  # approximate axis flip
+                    direction_tuple = tuple(direction_matrix.flatten())
+                else:
+                    direction_tuple = direction
+                origin = tuple(reversed(mask_sitk.GetOrigin()))
+                mask_ants = ants.from_numpy(mask_np_ants, origin=origin, spacing=spacing, direction=direction_tuple)
             # Binarize mask to ensure proper masking even if labels > 1
             mask_ants = ants.threshold_image(mask_ants, 0.5, 1e9, 1, 0)
         except Exception as e:
