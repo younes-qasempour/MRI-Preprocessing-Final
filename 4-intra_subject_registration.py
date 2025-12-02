@@ -5,22 +5,37 @@ This script performs intra-subject co-registration on MRI images using ANTs.
 For each patient in the input directory, it selects a fixed image (preferably a T1)
 and registers all other images to it.
 
+Usage:
+    python 4-intra_subject_registration.py \
+        --input_dir repeat-1 \
+        --output_dir repeat-4
+
+If no arguments are provided, the script will default to the historical paths
+used in prior runs (25-nov-new-images-output-denoised-bfc → 25-nov-registered-new).
+
 The registered images are saved in a new directory with "-reg" added to their filenames.
 """
 
 import os
+import argparse
 import ants
 from helpers import add_suffix_to_filename
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Define input (denoised + bias-corrected) and output directories for 25 Nov dataset
-input_dir = os.path.join(BASE_DIR, "25-nov-new-images-output-denoised-bfc")
-output_dir = os.path.join(BASE_DIR, "25-nov-registered-new")
+# CLI to allow flexible input/output directories while keeping historical defaults
+parser = argparse.ArgumentParser(description='Intra-subject co-registration of MRI volumes using ANTs.')
+parser.add_argument('--input_dir', type=str, default=os.path.join(BASE_DIR, '25-nov-new-images-output-denoised-bfc'),
+                    help='Root input directory containing patient subfolders. Default: 25-nov-new-images-output-denoised-bfc')
+parser.add_argument('--output_dir', type=str, default=os.path.join(BASE_DIR, '25-nov-registered-new'),
+                    help='Root output directory to save registered images. Default: 25-nov-registered-new')
+args = parser.parse_args()
+
+input_dir = args.input_dir
+output_dir = args.output_dir
 
 # Create output directory if it doesn't exist
-if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
+os.makedirs(output_dir, exist_ok=True)
 
 # Validate input directory and get list of patient folders
 if not os.path.isdir(input_dir):
@@ -47,8 +62,21 @@ for patient in patient_folders:
         continue
 
     # Try to select a T1-like image as fixed
+    # Prefer specifically the denoised+bias-corrected T1 if available
+    preferred_order = [
+        't1-d-bf.nii.gz', 't1-d-bf.nii',
+        't1c-d-bf.nii.gz', 't1c-d-bf.nii',
+        't1.nii.gz', 't1.nii'
+    ]
+    fixed_image_name = None
+    for cand in preferred_order:
+        if cand in all_files:
+            fixed_image_name = cand
+            break
+    # If none of the strict candidates are present, fall back to any filename containing 't1'
     t1_candidates = [f for f in all_files if 't1' in f.lower()]
-    fixed_image_name = t1_candidates[0] if t1_candidates else all_files[0]
+    if fixed_image_name is None:
+        fixed_image_name = t1_candidates[0] if t1_candidates else all_files[0]
     fixed_image_path = os.path.join(patient_input_dir, fixed_image_name)
 
     # Load fixed image
