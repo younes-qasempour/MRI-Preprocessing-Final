@@ -1,5 +1,6 @@
 import os
 import glob
+import argparse
 import ants
 from antspynet.utilities import brain_extraction
 from helpers import add_suffix_to_filename
@@ -11,11 +12,21 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 # Set base directory
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-print(f'Project folder = {BASE_DIR}')
 
-# Define input and output directories (updated for 26-nov mask run)
-input_dir = os.path.join(BASE_DIR, '25-nov-registered-new')
-output_masks_dir = os.path.join(BASE_DIR, '26-nov-brain-masks-new')
+# CLI to allow flexible input/output directories while keeping historical defaults
+parser = argparse.ArgumentParser(description='Run brain extraction to generate brain masks for MRI volumes.')
+parser.add_argument('--input_dir', type=str, default=os.path.join(BASE_DIR, '25-nov-registered-new'),
+                    help='Root input directory containing patient subfolders. Default: 25-nov-registered-new')
+parser.add_argument('--output_dir', type=str, default=os.path.join(BASE_DIR, '26-nov-brain-masks-new'),
+                    help='Root output directory to save brain masks. Default: 26-nov-brain-masks-new')
+args = parser.parse_args()
+
+input_dir = args.input_dir
+output_masks_dir = args.output_dir
+
+# Validate input
+if not os.path.isdir(input_dir):
+    raise SystemExit(f"Input directory not found: {input_dir}")
 
 # Create output directory if it doesn't exist
 os.makedirs(output_masks_dir, exist_ok=True)
@@ -24,8 +35,8 @@ os.makedirs(output_masks_dir, exist_ok=True)
 modality_string = "t1"
 
 # Get all patient folders
-patient_folders = glob.glob(os.path.join(input_dir, 'Patient*'))
-print(f'Found {len(patient_folders)} patient folders')
+patient_folders = [p for p in glob.glob(os.path.join(input_dir, 'Patient*')) if os.path.isdir(p)]
+print(f'Found {len(patient_folders)} patient folders in {input_dir}')
 
 # Process each patient folder
 for patient_folder in patient_folders:
