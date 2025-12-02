@@ -37,8 +37,9 @@ from typing import Dict, List, Optional, Tuple
 
 
 REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
-INPUT_ROOT = os.path.join(REPO_ROOT, '30-nov-Final-MRI-Data-1mm', 'Images')
-OUTPUT_ROOT = os.path.join(REPO_ROOT, 'Images-For-Modeling')
+# Defaults updated to consume repeat-6 outputs and write to final-repeat
+DEFAULT_INPUT_ROOT = os.path.join(REPO_ROOT, 'repeat-6', 'Images')
+DEFAULT_OUTPUT_ROOT = os.path.join(REPO_ROOT, 'final-repeat', 'Images-For-Modeling')
 
 
 def is_nifti(filename: str) -> bool:
@@ -114,7 +115,7 @@ def standard_name(patient_id: str, sequence: str, ext: str) -> str:
     return f"{patient_id}_{normalized_seq}{ext}"
 
 
-def run(input_root: str = INPUT_ROOT, output_root: str = OUTPUT_ROOT) -> None:
+def run(input_root: str = DEFAULT_INPUT_ROOT, output_root: str = DEFAULT_OUTPUT_ROOT) -> None:
     if not os.path.isdir(input_root):
         raise FileNotFoundError(f"Input directory not found: {input_root}")
 
@@ -147,4 +148,12 @@ def run(input_root: str = INPUT_ROOT, output_root: str = OUTPUT_ROOT) -> None:
 
 
 if __name__ == '__main__':
-    run()
+    # Allow overriding paths via CLI while keeping backward-compatible defaults
+    import argparse
+    parser = argparse.ArgumentParser(description='Prepare images for modeling (copy and standardize names).')
+    parser.add_argument('--input-root', type=str, default=DEFAULT_INPUT_ROOT,
+                        help='Input root directory containing per-patient image folders (default: repeat-6/Images).')
+    parser.add_argument('--output-root', type=str, default=DEFAULT_OUTPUT_ROOT,
+                        help='Output root directory for standardized images (default: final-repeat/Images-For-Modeling).')
+    args = parser.parse_args()
+    run(input_root=args.input_root, output_root=args.output_root)
